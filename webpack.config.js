@@ -1,31 +1,41 @@
 var path = require('path');
 var node_modules = path.resolve(__dirname, 'node_modules');
-var pathToReact = path.resolve(node_modules, 'react/dist/react.min.js');
-var pathToReactDOM = path.resolve(node_modules, 'react-dom/dist/react-dom.min.js');
+var webpack = require('webpack');
+var port = 7000;
+
 module.exports = {
-    devtool: "#inline-source-map",
-    resolve:{
-        alias: {
-            'react': pathToReact,
-            'react-dom': pathToReactDOM
-        }
-    },
+    port: port,
+    devtool:'source-map',
+    entry: [
+        'webpack-dev-server/client?http://localhost:'+ port,
+        'webpack/hot/only-dev-server',
+        'babel-polyfill',
+        './lib/index'
+    ],
     output: {
-        filename: 'bundle.js',
+        path:path.join(__dirname, '/dist'),
+        publicPath: '/dist/'
     },
+    plugins: [
+       new webpack.DefinePlugin({
+          'process.env': { NODE_ENV: JSON.stringify('development') }
+       }),
+       new webpack.HotModuleReplacementPlugin(),
+       new webpack.NoErrorsPlugin(),
+    ],
     module: {
         loaders: [{
             test: /\.js$/,
             exclude: /node_modules/,
-            loader: "babel-loader",
-            query: {
-                presets: ['es2015', 'react']
-            }
+            loaders: [ 'react-hot', 'babel-loader' ]
         },
         {
-            test: /\.scss$/,
-            loader: 'style!css!sass'
-        }],
-        noParse: [pathToReact]
+            test: /\.css$/,
+            exclude: path.join(__dirname, 'src'),
+            loader: 'style!css'
+        },
+        ],
     }
+
+
 };
